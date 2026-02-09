@@ -22,4 +22,45 @@ using custom validators in mongoose schema:
         arg2 == data of token
 
 
-    
+
+    IN MONGOOSE, USE ONE STYLE , BOTH CANT BE USED AT ONCE:
+        A. AYNC/AWAIT
+        B. NEXT
+
+
+
+
+====================================================
+    #####   NEW KEYWORD IMPORTANCE   ######
+Mongoose creating and updating differnec:
+    when we create a new instance of model, we use :
+        const req= new User({})......
+
+        this sets internally for req:   this.isNew = true
+
+    when we dont use new keyword for creating/updating:
+
+        const req= User.findById({_id})
+
+        this sets internally for req:   this.isNew = false
+
+
+    use it inside pre function to check if a document is being created or modified!!!
+
+
+=========================================================================== 
+    UPDATING A DOCUMENT AND USING $set:::
+
+    ConnectionRequestModel.updateOne(
+    { _id: id },
+    { status: "accepted" }
+        );===>    DOING THIS WILL CLEAR THE fromUserId and toUserId  and juts keep status=accepted
+
+
+    SO instead:
+    ConnectionRequestModel.updateOne(
+        {_id: id },
+        { $set: { status: "accepted" } }
+    );
+
+    ONLY UPDATE STATUS AND KEEP THE REST AS ITIS
