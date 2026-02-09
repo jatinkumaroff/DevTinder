@@ -1,0 +1,25 @@
+using custom validators in mongoose schema:
+    //validate key takes two values, first validator function, then message on error
+    validate: {
+        validator : (value)=>{
+            return true/false;
+        },
+        message: "this shows up when false"
+    }
+
+    using enum: when options are few predefined values:
+    enum:{
+        values:["val1", "val2"],
+        message:"error msg"
+    }
+
+      private key is "null" in string
+
+
+
+    res.cookie(arg1, arg2) ->its a function 
+        arg1 == name of token , always in STRING!!!!!!!!!
+        arg2 == data of token
+
+
+    

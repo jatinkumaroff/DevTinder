@@ -1,0 +1,11 @@
+private key is "null" in string
+
+CONNECTIONS:
+
+    SEND:
+        -STATUS VALIDATION
+        -FROM USER ID VALIDATION
+        -TO USER ID VALIDATION
+        -CHECK IF ANY SUCH REQUEST IS ALREADY PRESENT
+    REVIEW:
+        -
