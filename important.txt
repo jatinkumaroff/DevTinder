@@ -64,3 +64,35 @@ Mongoose creating and updating differnec:
     );
 
     ONLY UPDATE STATUS AND KEEP THE REST AS ITIS
+
+========================================================================================
+COMPOUNT INDEX:
+
+ in model-file.js 
+    schemaName.index({attr1:1, attr2:1 , attr3:1})      => stores according to the acsending order
+
+
+
+
+===========================================================================================
+NOW META-DATA STUFF: ref-populate::::
+
+    relation bw two tables:
+        just : ref:"User" -> inside fromUserId,toUserId creates the reference
+
+    populate :
+        user when finding from User Table(the one for which ref was created)
+
+        just:ConnectionRequestModel.find({}).populate("reffed attr", [array of User properties])
+
+    filtering :
+        to send just some specific data ->
+        from the whole data object, we need just the info about fromUserId, then we do map on it and just take the fromUserId by:
+        const data= friendConnections.map((doc)=>doc.fromUserId);
+
+    in friendConnections , we are sending the friends name back, we check if status of connection is accepted , but we dont check whether the req was send by current user to other or received, and just populating the fromUserIdd only.
+    In case if we send it , fromUserId will be ours and we will be shown in our own friends Field!!!
+    so to fix it we do:
+        check which one of from/to is loggedIN, and then pass the other in data
+
+    so while saving/sending data, we can use map to do stuff

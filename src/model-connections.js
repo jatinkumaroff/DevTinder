@@ -5,10 +5,12 @@ const connectionSchema = mongoose.Schema(
     fromUserId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     toUserId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     status: {
       type: String,
@@ -23,17 +25,11 @@ const connectionSchema = mongoose.Schema(
 );
 
 connectionSchema.pre("save", async function () {
-  const doc = this;
   //document that is meant to be saved like User({...}) -this is document
-  const connectionPresent = await ConnectionRequest.findOne({
-    $or: [
-      { toUserId: doc.toUserId, fromUserId: doc.fromUserId },
-      { toUserId: doc.fromUserId, fromUserId: doc.toUserId },
-    ],
-  });
-
-  if (connectionPresent) {
-    throw new Error("kitni bar bhejega");
+  const doc = this;
+  //self request check
+  if (doc.toUserId.equals(doc.fromUserId)) {
+    throw new Error("bsdk khud ko bhej raha h request?");
   }
 });
 

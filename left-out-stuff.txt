@@ -7,4 +7,8 @@ private key is "null" in string
     Profile things, like view profile, edit profile
     then feed api and then finally pagination
 
-    ref-populate
+    profile router apis:
+        - profile view =>konhai already made
+        - profile edit =>PATCH request
+
+    

@@ -26,17 +26,24 @@ connectionRouter.post(
         throw new Error("mann se bana raha hai kya user id?");
       }
 
-      //self request check
-      if (toUserId == fromUserId) {
-        throw new Error("bsdk khud ko bhej raha h request?");
+      const connectionPresent = await ConnectionRequestModel.findOne({
+        $or: [
+          { toUserId, fromUserId },
+          { toUserId: fromUserId, fromUserId: toUserId },
+        ],
+      });
+
+      if (connectionPresent) {
+        throw new Error("kitni bar bhejega");
       }
 
-      const newRequest = new ConnectionRequestModel({
+      const newRequest = await new ConnectionRequestModel({
         fromUserId,
         toUserId,
         status,
       });
 
+      console.log(newRequest);
       //schema level check
       await newRequest.save();
       res.send("request sent");
@@ -47,49 +54,46 @@ connectionRouter.post(
 );
 
 //review
-connectionRouter.post("/connection/review/:status/:requestId",userAuth,async (req, res) => {
-  try{
+connectionRouter.post(
+  "/connection/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const { requestId, status } = req.params;
+      const loggedInUser = req.user;
+      const loggedInUserId = loggedInUser._id.toString();
 
-    const { requestId, status } = req.params;
-    const loggedInUserId = req.user._id.toString();
-    
-    //checking if request is present:
-    const connectionRequest = await ConnectionRequestModel.findById(requestId);
-    if(!connectionRequest){
-      throw new Error("aisi koi request hai hi nahi, galat requestId")
+      //Status Validity:
+      if (!VALID_REVIEW_STATUS.includes(status)) {
+        throw new Error("tere baap ne ye status banaya h?" + status);
+      }
+
+      //checking if request is present:   => instead of three seperate checks for 1. ersquest id present in db, 2. checked by the correct user, 3. status should be interested only,  write all in single query by including all in finding matching request:
+      const connectionRequest = await ConnectionRequestModel.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id, //check the object==object
+        status: "interested",
+      });
+
+      if (!connectionRequest) {
+        return res
+          .status(404)
+          .json({ message: "aisi koi request hai hi nahi, galat requestId" });
+      }
+
+      //agar nahi mila , toh upar hi handle ho jayega.. mil gaya to modify karne ke liye:
+
+      const updatedRequest = await ConnectionRequestModel.findOneAndUpdate(
+        { _id: requestId },
+        { $set: { status: status } },
+        { new: true },
+      );
+
+      
+      res.send("updated the status for: " + loggedInUserId + " to " + status);
+    } catch (err) {
+      res.status(400).send("connection review me error hai: " + err.message);
     }
-
-
-    //checking if getting reviewd by correct user:
-    if (loggedInUserId != connectionRequest.toUserId.toString()) {
-      throw new Error("apni requests dekh, dusro ki kyu dekh raha");
-    }
-
-    //STATUS IGNORE TO NAHI HAI:
-    if(connectionRequest.status!="interested"){
-      throw new Error("nahi ho payega bhai, status interested ke alawa kuch aur hai")
-    }
-
-    if (!VALID_REVIEW_STATUS.includes(status)) {
-      throw new Error("tere baap ne ye status banaya h?" + status);
-    }
-
-    console.log(connectionRequest);
-    const updatedRequest= await ConnectionRequestModel.findOneAndUpdate(
-      {toUserId:loggedInUserId},
-      {$set:{status:status}},
-      {new:true}
-    )
-    console.log(updatedRequest)
-    res.send("updated the status for: "+ loggedInUserId +" to " + status);
-
-    
-  }catch(err){
-    res.status(400).send("connection review me error hai: "+ err.message);
-  }
-  
-
-  
   },
 );
 module.exports = connectionRouter;
